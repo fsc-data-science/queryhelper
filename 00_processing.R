@@ -35,6 +35,9 @@ clean_query <- function(querystring){
   # add new line to the end for simplicity 
   qs <- tolower(paste0(querystring, "\n"))
   
+  # Remove multi-line comments
+  qs <- gsub("(?s)/\\*.*?\\*/", "\n", qs, perl = TRUE)
+  
   # Remove single-line comments through new line
     qs <- gsub("--.*?\n", "\n", qs, perl = TRUE)
     
@@ -44,9 +47,7 @@ clean_query <- function(querystring){
   # Remove miscellaneous blank lines
   qs <- gsub("^\\s*\n", "\n", qs, perl = TRUE)
   
-  # Remove multi-line comments
-  qs <- gsub("(?s)/\\*.*?\\*/", "\n", qs, perl = TRUE)
-  
+
   # Remove all blank lines with a simple space
   qs <- gsub("\n", " ", qs)
   
@@ -61,9 +62,12 @@ clean_query(sql_code)
 # clean version of queries ---- 
 
 cleaned <- raw %>% rowwise() %>% mutate(
-  query = clean_query(STATEMENT)
+  query = clean_query(STATEMENT),
+  nch = nchar(query)
 )
+
+cleaned <- cleaned %>% filter(nch > 13)
 
 # Save a parsed down version ---- 
 
-saveRDS(cleaned[ ,c("ID", "NAME", "TABLES" ,"query")], file = "cleaned_queries.rds")
+saveRDS(cleaned[ ,c("ID", "NAME", "TABLES","query")], file = "cleaned_queries.rds")
