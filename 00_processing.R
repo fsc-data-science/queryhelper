@@ -46,4 +46,4 @@ cleaned <- cleaned %>% filter(nch > 13)
 
 # Save a parsed down version ---- 
 
-saveRDS(cleaned[ ,c("ID", "NAME", "TABLES","query")], file = "cleaned_queries.rds")
+saveRDS(cleaned[ ,c("ID", "NAME", "TABLES", "STATEMENT", "query")], file = "cleaned_queries.rds")
