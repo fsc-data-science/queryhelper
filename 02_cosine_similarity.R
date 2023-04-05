@@ -4,8 +4,8 @@ queries <- readRDS("cleaned_queries.rds")
 
 # Function to create a term-document matrix for two SQL queries
 create_tdm <- function(query1, query2) {
-  queries <- c(query1, query2)
-  corpus <- VCorpus(VectorSource(queries))
+  qs <- c(query1, query2)
+  corpus <- VCorpus(VectorSource(qs))
   tdm <- TermDocumentMatrix(corpus, control = list(tolower = TRUE, 
                                                    removePunctuation = TRUE, 
                                                    removeNumbers = TRUE,
