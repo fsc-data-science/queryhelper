@@ -14,6 +14,11 @@ clean_query <- function(querystring){
   # Remove miscellaneous blank lines
   qs <- gsub("^\\s*\n", "\n", qs, perl = TRUE)
   
+  # swap parentheses for spaces
+  qs <- gsub("\\(|\\)", " ", qs, perl = TRUE)
+  
+  # swap periods, underscores, commas for spaces 
+  qs <- gsub("\\.|\\_", " ", qs, perl = TRUE)
   
   # Remove all blank lines with a simple space
   qs <- gsub("\n", " ", qs)

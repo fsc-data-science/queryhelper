@@ -13,7 +13,7 @@ sql_code <- "
 --newcomment 
 -- new comment again
 with a AS (
-select 1 from dual),
+select 'a_b_.cc.d  444' from dual),
 
 /* multi 
 line
@@ -22,7 +22,7 @@ comment
 
 b AS (
 -- new comment
-select   2 from        dual
+select   'a(b)_.cc.d--xx' from        dual
 )
 
 --third comment
