@@ -25,35 +25,36 @@ generate_tdm_model <- function(queries,
 
 }
 
-#' 243, 961 large TDM
+#' 1001 large TDM
 #' punctuation, numbers, stopwords removed 
 #' Takes several minutes to build !! 
 
 qtdm_TTT <- generate_tdm_model(queries = queries$query,
+                               custom_dictionary = NULL,
                                     removpunc = TRUE, 
                                     removnum = TRUE,
                                     stops = TRUE)
 
 
-# Reduce to words appearing at least 200x 
+# Reduce to words appearing at least 2x 
 # AND weight rarer word co-occurrence.
 
-qtdm_TTT_200idf <- tm::weightTfIdf(
-  qtdm_TTT[which(row_sums(qtdm_TTT) >= 200), ]
+qtdm_TTT_2idf <- tm::weightTfIdf(
+  qtdm_TTT[which(row_sums(qtdm_TTT) >= 2), ]
   )
   
-#' 243, 961 large TDM
+#' 1001 large TDM
 #' numbers removed, stopwords & punctuation kept 
 #' Takes several minutes to build !!
 qtdm_FTF <- generate_tdm_model(queries = queries$query,
+                               custom_dictionary = NULL,
                                removpunc = FALSE, 
                                removnum = TRUE,
                                stops = FALSE)
 
-qtdm_FTF_200idf <- tm::weightTfIdf(
-  qtdm_FTF[which(row_sums(qtdm_FTF) >= 200), ]
+qtdm_FTF_2idf <- tm::weightTfIdf(
+  qtdm_FTF[which(row_sums(qtdm_FTF) >= 2), ]
 )
-
 
 new_query <- {
   "
@@ -80,51 +81,34 @@ marginal_cosim <- function(new_query, tdm_model,
                            removnum = TRUE,
                            stops = FALSE,
                            idf = TRUE){
- nq <- new_query
+browser()
+   nq_tdm <- generate_tdm_model(queries = new_query,
+                              custom_dictionary = Terms(tdm_model),
+                              removpunc = removpunc, 
+                              removnum = removnum,
+                              stops = stops)
    
- nq_corp <- VCorpus(VectorSource(nq))
- 
- # re-use terms from previously existing model
- nq_tdm <- TermDocumentMatrix(nq_corp, 
-                              control = list(dictionary = Terms(tdm_model), 
-                                             tolower = TRUE, 
-                                             removePunctuation = removpunc, 
-                                             removeNumbers = removnum,
-                                             stopwords = stops))
- 
  if(idf){
    nq_tdm <- tm::weightTfIdf(nq_tdm)
  }
  
+cosine_dist <- proxy::dist(nq_tdm, tdm_model, method = "cosine")
  
+ # 1 = similarity+distance
+ similarities <- 1 - cosine_dist
  
- qvec_history <- as.matrix(tdm_model)
- new_qvec <- as.matrix(nq_tdm)
- 
- # new_qvec is a T x 1 matrix (terms rows, 1 column)
- # qvec_history is T x N matrix (terms rows, N columns)
- # transpose qvec_history to get: 
- # [T x N]^-1 %*% [T x 1]
- # [N x T] %*% [T x 1] = dot-product
- 
- dot_products <- t(qvec_history) %*% new_qvec 
- 
- # similarly, transpose the square prior to rowSums 
- # to get magnitude vector for calculating similarity.
- magnitudes <- sqrt(rowSums(t(qvec_history ^ 2))) * sqrt(sum(new_qvec ^ 2))
- similarities <- as.numeric(dot_products / magnitudes)
- 
- return(similarities)
+  return(similarities)
   
 }
 
-
-cs_ttt <- marginal_cosim(nq, qtdm_TTT_200idf,
+cs_ttt <- marginal_cosim(new_query = nq, 
+                         tdm_model = qtdm_TTT_2idf,
                          removpunc = TRUE, 
                          removnum = TRUE,
-                         stops = TRUE)
+                         stops = TRUE,
+                         idf = TRUE)
 
-cs_ftf <- marginal_cosim(nq, qtdm_FTF_200idf,
+cs_ftf <- marginal_cosim(nq, qtdm_FTF_2idf,
                          removpunc = FALSE, 
                          removnum = TRUE,
                          stops = FALSE)
