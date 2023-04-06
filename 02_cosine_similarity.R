@@ -7,13 +7,19 @@ queries <- readRDS("cleaned_queries.rds")
 create_tdm <- function(new_query, relevant_query_history,
                        removpunc = FALSE,
                        removnum = TRUE,
-                       stops = FALSE) {
+                       stops = FALSE,
+                       idf = TRUE) {
   qs <- c(new_query, relevant_query_history)
   corpus <- VCorpus(VectorSource(qs))
   tdm <- TermDocumentMatrix(corpus, control = list(tolower = TRUE, 
                                                    removePunctuation = removpunc, 
                                                    removeNumbers = removnum,
                                                    stopwords = stops))
+  if(idf){
+  # weight rarer terms higher 
+  tdm <- tm::weightTfIdf(tdm)
+  }
+  
   return(tdm)
 }
 
@@ -29,11 +35,18 @@ cosine_similarity <- function(query_1, query_2) {
     return(similarity)
 }
 
-cosine_similarity_bulk <- function(new_query, relevant_query_history,removpunc = FALSE,
+cosine_similarity_bulk <- function(new_query, relevant_query_history,
+                                   removpunc = FALSE,
                                    removnum = TRUE,
-                                   stops = FALSE) {
+                                   stops = FALSE,
+                                   idf = TRUE) {
   
-  tdm <- create_tdm(new_query, relevant_query_history, removpunc = removpunc)
+  tdm <- create_tdm(new_query, relevant_query_history,
+                    removpunc = removpunc,
+                    removnum = removnum,
+                    stops = stops,
+                    idf = idf)
+  
   tdm_matrix <- as.matrix(tdm)
   new_qvec <- as.matrix(tdm_matrix[, 1])
   qvec_history <- as.matrix(tdm_matrix[, -1]) 
@@ -78,16 +91,14 @@ for(i in 1:nrow(op_transfers_queries)){
   cs[i] <- cosine_similarity(nq, op_transfers_queries$query[i])
 }
 
-cs1 <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
-                              removpunc = FALSE, 
-                              removnum = TRUE, 
-                              stops = TRUE)
-cs2 <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+cs_ttt <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
                               removpunc = TRUE,
                               removnum = TRUE, 
                               stops = TRUE)
 
-if(mean(cs == cs2) == 1){
-  message("Bulk exactly matches pairwise :)")
-}
+cs_ftf <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+                                 removpunc = FALSE, 
+                                 removnum = TRUE, 
+                                 stops = FALSE)
+
 

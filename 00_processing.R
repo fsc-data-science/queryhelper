@@ -38,11 +38,11 @@ clean_query(sql_code)
 # clean version of queries ---- 
 
 cleaned <- raw %>% rowwise() %>% mutate(
-  query = clean_query(STATEMENT),
-  nch = nchar(query)
+  query = clean_query(STATEMENT)
 )
 
-cleaned <- cleaned %>% filter(nch > 13)
+# queries have to have select and from or assume they are broken
+cleaned <- cleaned %>% filter(grepl('select', query) & grepl('from', query))
 
 # Save a parsed down version ---- 
 
