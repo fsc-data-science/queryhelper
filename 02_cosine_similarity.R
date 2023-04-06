@@ -27,7 +27,7 @@ cosine_similarity <- function(query_1, query_2) {
 }
 
 cosine_similarity_bulk <- function(new_query, relevant_query_history) {
-  browser()
+  
   tdm <- create_tdm(new_query, relevant_query_history)
   tdm_matrix <- as.matrix(tdm)
   new_qvec <- as.matrix(tdm_matrix[, 1])
@@ -38,21 +38,21 @@ cosine_similarity_bulk <- function(new_query, relevant_query_history) {
   # transpose qvec_history to get: 
   # [T x N]^-1 %*% [T x 1]
   # [N x T] %*% [T x 1] = dot-product
-  dot_product <- t(qvec_history) %*% new_qvec 
+  dot_products <- t(qvec_history) %*% new_qvec 
   
   # similarly, transpose the square prior to rowSums 
   # to get magnitude vector for calculating similarity.
-  magnitudes <- sqrt( rowSums(t(qvec_history ^ 2)) * sqrt(sum(new_qvec ^ 2)))
+  magnitudes <- sqrt(rowSums(t(qvec_history ^ 2))) * sqrt(sum(new_qvec ^ 2))
   similarities <- as.numeric(dot_products / magnitudes)
   
-  return(similarity)
+  return(similarities)
 }
 
 
 op_transfers_queries <- queries %>% filter(grepl('optimism.core.fact_token_transfers', TABLES))
 
 # smaller sample 
-op_transfers_queries <- op_transfers_queries[1:100,]
+op_transfers_queries <- op_transfers_queries[1:100, ]
 
 new_query <- {
 "
@@ -78,11 +78,7 @@ for(i in 1:nrow(op_transfers_queries)){
 
 cs2 <- cosine_similarity_bulk(nq, op_transfers_queries$query)
 
-hist(unlist(cs), breaks = 10)
+if(mean(cs == cs2) == 1){
+  message("Bulk exactly matches pairwise :)")
+}
 
-top_index <- which(unlist(cs) >= 0.5)
-
-results <- op_transfers_queries[top_index, ]
-results$cosine_score <- unlist(cs)[top_index]
-
-View(results)
