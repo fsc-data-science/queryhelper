@@ -4,13 +4,16 @@ source("clean_query.R")
 queries <- readRDS("cleaned_queries.rds")
 
 # Function to create a term-document matrix for two SQL queries
-create_tdm <- function(new_query, relevant_query_history) {
+create_tdm <- function(new_query, relevant_query_history,
+                       removpunc = FALSE,
+                       removnum = TRUE,
+                       stops = FALSE) {
   qs <- c(new_query, relevant_query_history)
   corpus <- VCorpus(VectorSource(qs))
-  tdm <- TermDocumentMatrix(corpus, control = list(tolower = FALSE, 
-                                                   removePunctuation = FALSE, 
-                                                   removeNumbers = FALSE,
-                                                   stopwords = FALSE))
+  tdm <- TermDocumentMatrix(corpus, control = list(tolower = TRUE, 
+                                                   removePunctuation = removpunc, 
+                                                   removeNumbers = removnum,
+                                                   stopwords = stops))
   return(tdm)
 }
 
@@ -26,9 +29,11 @@ cosine_similarity <- function(query_1, query_2) {
     return(similarity)
 }
 
-cosine_similarity_bulk <- function(new_query, relevant_query_history) {
+cosine_similarity_bulk <- function(new_query, relevant_query_history,removpunc = FALSE,
+                                   removnum = TRUE,
+                                   stops = FALSE) {
   
-  tdm <- create_tdm(new_query, relevant_query_history)
+  tdm <- create_tdm(new_query, relevant_query_history, removpunc = removpunc)
   tdm_matrix <- as.matrix(tdm)
   new_qvec <- as.matrix(tdm_matrix[, 1])
   qvec_history <- as.matrix(tdm_matrix[, -1]) 
@@ -50,21 +55,18 @@ cosine_similarity_bulk <- function(new_query, relevant_query_history) {
 
 
 op_transfers_queries <- queries %>% filter(grepl('optimism.core.fact_token_transfers', TABLES))
-
-# smaller sample 
 op_transfers_queries <- op_transfers_queries[1:100, ]
-
 new_query <- {
 "
--- daily token transfer amounts by num transfers on optimism
-SELECT DATE_TRUNC( 'day', BLOCK_TIMESTAMP) as day_,
- CONTRACT_ADDRESS, 
-count(*) as n_transfers,
-sum(raw_amount) as transfer_amt
-  FROM optimism.core.fact_token_transfers
-GROUP BY 1,2
-ORDER BY day_ asc, n_transfers DESC
-;
+  -- daily token transfer amounts by num transfers on optimism
+  SELECT DATE_TRUNC( 'day', BLOCK_TIMESTAMP) as day_,
+   CONTRACT_ADDRESS, 
+  count(*) as n_transfers,
+  sum(raw_amount) as transfer_amt
+    FROM optimism.core.fact_token_transfers
+  GROUP BY 1,2
+  ORDER BY day_ asc, n_transfers DESC
+  ;
 "
 }
 
@@ -76,7 +78,14 @@ for(i in 1:nrow(op_transfers_queries)){
   cs[i] <- cosine_similarity(nq, op_transfers_queries$query[i])
 }
 
-cs2 <- cosine_similarity_bulk(nq, op_transfers_queries$query)
+cs1 <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+                              removpunc = FALSE, 
+                              removnum = TRUE, 
+                              stops = TRUE)
+cs2 <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+                              removpunc = TRUE,
+                              removnum = TRUE, 
+                              stops = TRUE)
 
 if(mean(cs == cs2) == 1){
   message("Bulk exactly matches pairwise :)")
