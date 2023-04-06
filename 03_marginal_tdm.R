@@ -1,22 +1,26 @@
 library(tm)
 library(slam)
+library(proxy)
+library(Matrix)
 library(dplyr)
 
 source("clean_query.R")
-queries <- readRDS("cleaned_queries.rds")
+queries <- readRDS("cleaned_queries.rds")[2000:3000, ]
 
 # Big - must be retrained regularly 
 generate_tdm_model <- function(queries, 
-                               term_frequency_minimum = 20,
+                               custom_dictionary = NULL,
                        removpunc = TRUE,
                        removnum = TRUE,
                        stops = TRUE){
   qs <- queries
   corpus <- VCorpus(VectorSource(qs))
-  tdm <- TermDocumentMatrix(corpus, control = list(tolower = TRUE, 
+  tdm <- TermDocumentMatrix(corpus, control = list(dictionary = custom_dictionary,
+                                                   tolower = TRUE, 
                                                    removePunctuation = removpunc, 
                                                    removeNumbers = removnum,
                                                    stopwords = stops))
+  
   return(tdm)
 
 }
@@ -35,10 +39,9 @@ qtdm_TTT <- generate_tdm_model(queries = queries$query,
 # AND weight rarer word co-occurrence.
 
 qtdm_TTT_200idf <- tm::weightTfIdf(
-  tdm[which(row_sums(tdm) >= 200), ]
+  qtdm_TTT[which(row_sums(qtdm_TTT) >= 200), ]
   )
   
-
 #' 243, 961 large TDM
 #' numbers removed, stopwords & punctuation kept 
 #' Takes several minutes to build !!
@@ -46,6 +49,11 @@ qtdm_FTF <- generate_tdm_model(queries = queries$query,
                                removpunc = FALSE, 
                                removnum = TRUE,
                                stops = FALSE)
+
+qtdm_FTF_200idf <- tm::weightTfIdf(
+  qtdm_FTF[which(row_sums(qtdm_FTF) >= 200), ]
+)
+
 
 new_query <- {
   "
@@ -70,7 +78,8 @@ nq <- clean_query(new_query)
 marginal_cosim <- function(new_query, tdm_model, 
                            removpunc = FALSE, 
                            removnum = TRUE,
-                           stops = FALSE){
+                           stops = FALSE,
+                           idf = TRUE){
  nq <- new_query
    
  nq_corp <- VCorpus(VectorSource(nq))
@@ -82,6 +91,12 @@ marginal_cosim <- function(new_query, tdm_model,
                                              removePunctuation = removpunc, 
                                              removeNumbers = removnum,
                                              stopwords = stops))
+ 
+ if(idf){
+   nq_tdm <- tm::weightTfIdf(nq_tdm)
+ }
+ 
+ 
  
  qvec_history <- as.matrix(tdm_model)
  new_qvec <- as.matrix(nq_tdm)
@@ -104,12 +119,12 @@ marginal_cosim <- function(new_query, tdm_model,
 }
 
 
-cs_ttt <- marginal_cosim(nq, qtdm_TTT,
+cs_ttt <- marginal_cosim(nq, qtdm_TTT_200idf,
                          removpunc = TRUE, 
                          removnum = TRUE,
                          stops = TRUE)
 
-cs_FTF <- marginal_cosim(nq, qtdm_FTF,
+cs_ftf <- marginal_cosim(nq, qtdm_FTF_200idf,
                          removpunc = FALSE, 
                          removnum = TRUE,
                          stops = FALSE)
