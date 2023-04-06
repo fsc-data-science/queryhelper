@@ -66,9 +66,6 @@ cosine_similarity_bulk <- function(new_query, relevant_query_history,
   return(similarities)
 }
 
-
-op_transfers_queries <- queries %>% filter(grepl('optimism.core.fact_token_transfers', TABLES))
-op_transfers_queries <- op_transfers_queries[1:100, ]
 new_query <- {
 "
   -- daily token transfer amounts by num transfers on optimism
@@ -86,19 +83,26 @@ new_query <- {
 # clean for cosine similarity
 nq <- clean_query(new_query)
 
-cs <- list()
-for(i in 1:nrow(op_transfers_queries)){
-  cs[i] <- cosine_similarity(nq, op_transfers_queries$query[i])
-}
-
-cs_ttt <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+cs_ttt <- cosine_similarity_bulk(nq, queries$query[1000:3000], 
                               removpunc = TRUE,
                               removnum = TRUE, 
-                              stops = TRUE)
+                              stops = TRUE, 
+                              idf = TRUE)
 
-cs_ftf <- cosine_similarity_bulk(nq, op_transfers_queries$query, 
+profvis::profvis(
+  {
+    cosine_similarity_bulk(nq, queries$query[1000:3000], 
+                           removpunc = TRUE,
+                           removnum = TRUE, 
+                           stops = TRUE, 
+                           idf = TRUE)
+  }
+)
+
+cs_ftf <- cosine_similarity_bulk(nq, queries$query[1000:3000], 
                                  removpunc = FALSE, 
                                  removnum = TRUE, 
-                                 stops = FALSE)
+                                 stops = FALSE, 
+                                 idf = TRUE)
 
 
