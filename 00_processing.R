@@ -42,7 +42,10 @@ cleaned <- raw %>% rowwise() %>% mutate(
 )
 
 # queries have to have select and from or assume they are broken
-cleaned <- cleaned %>% filter(grepl('select', query) & grepl('from', query))
+# also throw out excessively long ones 
+cleaned <- cleaned %>% 
+  filter(grepl('select', query) & grepl('from', query)) %>% 
+  filter(nchar(query) < 1000)
 
 # Save a parsed down version ---- 
 
