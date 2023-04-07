@@ -2,6 +2,7 @@ library(tm)
 library(slam)
 library(dplyr)
 source("clean_query.R")
+source("calculate_similarity.R")
 querytbl <- readRDS("select_querytbl.rds")
 select_tdm <- readRDS("select_tdm_model.rds")
 
@@ -24,22 +25,6 @@ nq <- clean_query(new_query)
 
 nqtdm <- generate_tdm_model(nq, custom_dictionary = Terms(select_tdm))
 
-calc_cos_sims <- function(tdm_model, newtdm){
-  
-  dot_products <- row_sums(crossprod_simple_triplet_matrix(tdm_model, newtdm))
-  magnitudes <- sqrt(col_sums(newtdm^2)) * sqrt(col_sums( tdm_model  ^ 2))
-  similarities <- dot_products / magnitudes
-  
-  df <- data.frame(
-    docs = names(similarities),
-    index = 1:length(similarities),
-    cosim = as.numeric(similarities), 
-    row.names = NULL
-  )
-  
-  return(df)
-}
-
-res <- calc_cos_sims(select_tdm, nqtdm)
+res <- calculate_similarity(select_tdm, nqtdm)
 
 

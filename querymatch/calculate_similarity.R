@@ -1,10 +1,7 @@
 library(tm)
 library(slam)
-library(dplyr)
 
-# use calculate_similarity() instead 
-
-calc_cos_sims <- function(tdm_model, newtdm){
+calculate_similarity <- function(tdm_model, newtdm){
   
   dot_products <- row_sums(crossprod_simple_triplet_matrix(tdm_model, newtdm))
   magnitudes <- sqrt(col_sums(newtdm^2)) * sqrt(col_sums( tdm_model  ^ 2))
