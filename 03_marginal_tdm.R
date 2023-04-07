@@ -5,7 +5,7 @@ library(Matrix)
 library(dplyr)
 
 source("clean_query.R")
-queries <- readRDS("cleaned_queries.rds")[2000:3000, ]
+queries <- readRDS("cleaned_queries.rds")
 
 # Big - must be retrained regularly 
 generate_tdm_model <- function(queries, 
@@ -28,12 +28,32 @@ generate_tdm_model <- function(queries,
 #' 1001 large TDM
 #' punctuation, numbers, stopwords removed 
 #' Takes several minutes to build !! 
+dictlist <- read.csv("custom_dictionary.csv", row.names = NULL)
 
 qtdm_TTT <- generate_tdm_model(queries = queries$query,
-                               custom_dictionary = NULL,
+                               custom_dictionary = dictlist$x,
                                     removpunc = TRUE, 
                                     removnum = TRUE,
                                     stops = TRUE)
+
+# 
+# termfreq <- data.frame(
+#   term = Terms(qtdm_TTT),
+#   n = row_sums(qtdm_TTT), 
+#   m = row_means(qtdm_TTT), 
+#   row.names = NULL
+# )
+# 
+# # terms that appear at least 2000 times 
+#  dictlist <- termfreq[termfreq$n >= 2000, "term"]
+#  write.csv(dictlist, file = "custom_dictionary.csv", row.names = FALSE)
+
+docfreq <- data.frame(
+  docs = Docs(qtdm_TTT),
+  n = col_sums(qtdm_TTT),
+  m = col_means(qtdm_TTT)
+) 
+
 
 
 # Reduce to words appearing at least 2x 
@@ -91,8 +111,10 @@ browser()
  if(idf){
    nq_tdm <- tm::weightTfIdf(nq_tdm)
  }
- 
-cosine_dist <- proxy::dist(nq_tdm, tdm_model, method = "cosine")
+  
+   # (T x 1) * (T x N)
+   # transpose: (1 x T) * (T x N) = (1 x N)
+cosine_dist <- proxy::dist(Matrix::t(nq_tdm), tdm_model, method = "cosine")
  
  # 1 = similarity+distance
  similarities <- 1 - cosine_dist
@@ -102,11 +124,11 @@ cosine_dist <- proxy::dist(nq_tdm, tdm_model, method = "cosine")
 }
 
 cs_ttt <- marginal_cosim(new_query = nq, 
-                         tdm_model = qtdm_TTT_2idf,
+                         tdm_model = qtdm_TTT,
                          removpunc = TRUE, 
                          removnum = TRUE,
                          stops = TRUE,
-                         idf = TRUE)
+                         idf = FALSE)
 
 cs_ftf <- marginal_cosim(nq, qtdm_FTF_2idf,
                          removpunc = FALSE, 
