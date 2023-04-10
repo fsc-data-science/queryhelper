@@ -3,6 +3,7 @@ library(slam)
 library(dplyr)
 source("clean_query.R")
 source("calculate_similarity.R")
+source("generate_tdm.R")
 querytbl <- readRDS("select_querytbl.rds")
 select_tdm <- readRDS("select_tdm_model.rds")
 
