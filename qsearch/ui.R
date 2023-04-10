@@ -51,7 +51,7 @@ shinyUI(fluidPage(
       fluidRow(
         column(8, 
                textAreaInput(inputId = "textarea",
-                             label = "Text Area", 
+                             label = "Paste SQL or any SQL-ish", 
                              value = "select count num daily users from ethereum fact transactions", 
                              width = "100%", 
                              height = "100%", 

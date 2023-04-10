@@ -65,6 +65,7 @@ server <- function(input, output, session) {
      mt <- match_tbl()
      mt$score <- round(mt$score, digits = 2)
      mt$TABLES <- lapply(mt$TABLES, clean_tbl_names)
+     mt$nchar <- nchar(mt$STATEMENT)
      
      # 1 table at a time only
      # or else AND/OR rules would complicate this
@@ -74,18 +75,19 @@ server <- function(input, output, session) {
                 mean(grepl(input$tablefilter, x)) > 0   }
        ))
      
-     mt[mt$score >= input$minscore & tblfilter_index, c("ID","NAME","score","STATEMENT")]
+     mt[mt$score >= input$minscore & tblfilter_index, c("ID","NAME","score","STATEMENT", "nchar")]
      
      })
   
   output$results_reactbl <- renderReactable({
        reactable(select_tbl(), 
               columns = list(
-      ID = colDef(minWidth = 30,
+      ID = colDef(minWidth = 25,
                   cell = link_renderer),
       NAME = colDef(minWidth = 20),
       score = colDef(minWidth = 10),
-      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 100)
+      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 100),
+      nchar = colDef(minWidth = 15)
     ))
     
   })
