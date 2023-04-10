@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   })
   
   qtext <- reactive({
-    input$textarea
+   clean_query(shQuote(input$textarea))
   })
   
   search_results <- eventReactive(input$search, {
@@ -78,15 +78,14 @@ server <- function(input, output, session) {
      
      })
   
-  # Simple reactable - see: styles.css for formatting
-  output$myreactable <- renderReactable({
+  output$results_reactbl <- renderReactable({
        reactable(select_tbl(), 
               columns = list(
       ID = colDef(minWidth = 30,
                   cell = link_renderer),
       NAME = colDef(minWidth = 20),
       score = colDef(minWidth = 10),
-      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 120)
+      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 100)
     ))
     
   })

@@ -81,10 +81,9 @@ shinyUI(fluidPage(
     class = 'chart-container',
     div(
       class = 'chart-block',
-      div(class = 'chart-title', span('Reactable Table EXAMPLE'),
-      
       fluidRow(
-        column(6, 
+        column(1, br()),
+        column(6, class = "simscore",
                sliderInput(inputId = 'minscore',
                            label = "Min Similarity Score",
                            min = 0.05,
@@ -93,7 +92,7 @@ shinyUI(fluidPage(
                            step = 0.05, 
                            width = "80%")
         ), 
-        column(6, 
+        column(5, 
                selectInput(inputId = "tablefilter", 
                            label = "Filter by Table Used",
                            choices = NULL,
@@ -102,8 +101,10 @@ shinyUI(fluidPage(
                            selectize = TRUE,
                            width =  "80%")
                )
-      )),
-      reactableOutput("myreactable")
+      ),
+      p(class = 'fork', "Select an ID to Fork the Query on the Flipside Data App"),
+      hr(),
+      reactableOutput("results_reactbl")
       )
     )
   
