@@ -32,8 +32,8 @@ server <- function(input, output, session) {
                    })
       
       if(newsrch$status_code == 200){
-        resp <- content(newsrch)
-        prev_result(resp)
+        resp <- httr::content(newsrch)
+        prev_result(list(resp))
         error_track(0)
       } else { 
         error_track(newsrch)
