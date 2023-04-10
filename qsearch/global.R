@@ -1,4 +1,5 @@
 library(shinyjs)
+library(htmltools)
 library(reactable)
 library(httr)
 library(jsonlite)
@@ -24,3 +25,8 @@ preformatted_cell_renderer <- function(value) {
   htmltools::tags$div(style = "white-space: pre-wrap;", value)
 }
 
+link_renderer <- function(id) {
+    htmltools::tags$a(href = paste0("https://flipsidecrypto.xyz/edit/queries/",id),
+                    target = "_blank",
+                    as.character(id))
+}

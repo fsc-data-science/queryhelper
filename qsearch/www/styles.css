@@ -2,7 +2,9 @@
 /*******************/
 /*PUT CUSTOM CLASSES HERE*/
 /*******************/
-
+.shiny-output-error {
+  font-size: 0px;
+}
 
 /*******************/
 /*     GENERAL Page     */
@@ -224,6 +226,7 @@ input[type=number] {
   background-color: #171e25;
     color: #C4CDD5;
     border: none;
+    font-size: 14px;
 }
 
 .rt-th {

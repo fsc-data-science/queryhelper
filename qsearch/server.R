@@ -52,7 +52,7 @@ server <- function(input, output, session) {
                       inputId = "tablefilter", 
                 label = "Filter by Table Used",
                 selected = "", 
-                choices = c(tabls_, "")
+                choices = c(tabls_, ".")
     )
     
   })
@@ -63,6 +63,7 @@ server <- function(input, output, session) {
                               {
                                 
      mt <- match_tbl()
+     mt$score <- round(mt$score, digits = 2)
      mt$TABLES <- lapply(mt$TABLES, clean_tbl_names)
      
      # 1 table at a time only
@@ -81,10 +82,11 @@ server <- function(input, output, session) {
   output$myreactable <- renderReactable({
        reactable(select_tbl(), 
               columns = list(
-      ID = colDef(width = 40),
-      NAME = colDef(minWidth = 100),
-      score = colDef(width = 20),
-      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 200)
+      ID = colDef(minWidth = 30,
+                  cell = link_renderer),
+      NAME = colDef(minWidth = 20),
+      score = colDef(minWidth = 10),
+      STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 120)
     ))
     
   })
