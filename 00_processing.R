@@ -4,7 +4,8 @@
 
 library(readr)
 library(dplyr)
-raw <- readr::read_csv("raw_query_data.csv", skip = 1)
+source("clean_query.R")
+raw <- readr::read_csv("historic_queries_pull.csv")
 
 # Cleaning up comments and errant spaces ----
 
@@ -31,7 +32,6 @@ SELECT * FROM a
 /* random comment */
  UNION     ALL     (SELECT * FROM   b )"
 
-source("clean_query.R")
 
 clean_query(sql_code)
 
@@ -49,4 +49,4 @@ cleaned <- cleaned %>%
 
 # Save a parsed down version ---- 
 
-saveRDS(cleaned[ ,c("ID", "NAME", "TABLES", "STATEMENT", "query")], file = "cleaned_queries.rds")
+saveRDS(cleaned, file = "cleaned_queries.rds")
