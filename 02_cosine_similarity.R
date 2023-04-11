@@ -1,6 +1,5 @@
 library(tm)
 library(slam)
-library(dplyr)
 source("clean_query.R")
 source("calculate_similarity.R")
 source("generate_tdm.R")
