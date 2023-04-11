@@ -9,16 +9,15 @@ clean_tbl_names <- function(tblnames){
   return(tblnames)
 }
 
-queries$TABLES <- lapply(queries$TABLES, clean_tbl_names)
 # Filter out use of extremely rare tables 
 # may be deprecated or erroneous 
 
-tbl_list <- as.data.frame(table(unlist(queries$TABLES)))
+tbl_list <- as.data.frame(table(unlist(lapply(queries$TABLES, clean_tbl_names))))
 
 # table must be used at least 5 times 
 cuttbls <- tbl_list$Var1[tbl_list$Freq < 5] 
 
-cutrows <- unlist(lapply(queries$TABLES, function(x){
+cutrows <- unlist(lapply(lapply(queries$TABLES, clean_tbl_names), function(x){
   mean(cuttbls %in% x) > 0
 }))
 

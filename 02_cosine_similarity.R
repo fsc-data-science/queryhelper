@@ -4,8 +4,9 @@ library(dplyr)
 source("clean_query.R")
 source("calculate_similarity.R")
 source("generate_tdm.R")
-querytbl <- readRDS("select_querytbl.rds")
-select_tdm <- readRDS("select_tdm_model.rds")
+# LOCAL Model 
+querytbl <- readRDS("querytbl.rds")
+select_tdm <- readRDS("tdm_model.rds")
 
 new_query <- {
   "
@@ -25,7 +26,12 @@ new_query <- {
 nq <- clean_query(new_query)
 
 nqtdm <- generate_tdm_model(nq, custom_dictionary = Terms(select_tdm))
-
 res <- calculate_similarity(select_tdm, nqtdm)
+
+n =  10
+
+response <- querytbl[res$index[order(res$cosim, decreasing = TRUE)[1:n]], ]
+response$score <- res$cosim[order(res$cosim, decreasing = TRUE)[1:n]]
+response
 
 
