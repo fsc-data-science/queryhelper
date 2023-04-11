@@ -1,4 +1,3 @@
-library(tm)
 library(slam)
 
 calculate_similarity <- function(tdm_model, newtdm){
@@ -8,7 +7,6 @@ calculate_similarity <- function(tdm_model, newtdm){
   similarities <- dot_products / magnitudes
   
   df <- data.frame(
-    docs = names(similarities),
     index = 1:length(similarities),
     cosim = as.numeric(similarities), 
     row.names = NULL

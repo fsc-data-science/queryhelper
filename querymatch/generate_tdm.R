@@ -1,5 +1,4 @@
 library(tm)
-library(slam)
 
 generate_tdm_model <- function(queries, 
                                custom_dictionary = NULL,

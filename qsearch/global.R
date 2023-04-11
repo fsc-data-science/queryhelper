@@ -7,7 +7,6 @@ source("clean_query.R")
 
 baseurl <- readLines("qmatch_url.txt")
 
-
 qsearch <- function(website_base_url, query_text, n = 10){
   url <- paste0(website_base_url, "querytext=", URLencode(query_text, reserved = TRUE), "&n=", n)
   headers <- add_headers("accept" = "*/*")
