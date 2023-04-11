@@ -24,15 +24,15 @@ server <- function(input, output, session) {
                    expr = {
                      incProgress(0.1)
                      incProgress(0.25)
-      newsrch <- qsearch(baseurl, query_text = qtext(), n = input$nresults)
+      newsrch <- get_top(querytext = qtext(), n = input$nresults)
       nn <<- newsrch
                       incProgress(detail = "Calculating Similarity",
                                   amount = 0.65)
       
                    })
       
-      if(newsrch$status_code == 200){
-        resp <- httr::content(newsrch)
+      if(nrow(newsrch) > 0){
+        resp <- newsrch
         prev_result(resp)
         error_track(0)
       } else { 
@@ -41,7 +41,7 @@ server <- function(input, output, session) {
     })
   
   match_tbl <- eventReactive(prev_result(), {
-    do.call(rbind.data.frame, prev_result())
+    prev_result()
   })
   
   observeEvent(match_tbl(), {
@@ -83,11 +83,11 @@ server <- function(input, output, session) {
               columns = list(
       QUERY_ID = colDef(minWidth = 25,
                   cell = link_renderer),
-      NAME = colDef(minWidth = 20),
-      score = colDef(minWidth = 10),
+      NAME = colDef(minWidth = 25),
+      score = colDef(minWidth = 15),
       STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 100),
       NCHAR = colDef(minWidth = 15),
-      QUERY_TIME = colDef(minWidth = 20)
+      QUERY_TIME = colDef(minWidth = 25)
     ))
     
   })

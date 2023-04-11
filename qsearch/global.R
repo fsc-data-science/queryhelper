@@ -1,9 +1,14 @@
+
+source("clean_query.R")
+source("generate_tdm.R")
+source("calculate_similarity.R")
 library(shinyjs)
 library(htmltools)
 library(reactable)
 library(httr)
 library(jsonlite)
-source("clean_query.R")
+querytbl <- readRDS("querytbl.rds")
+select_tdm <- readRDS("tdm_model.rds")
 
 baseurl <- readLines("qmatch_url.txt")
 
@@ -30,4 +35,19 @@ link_renderer <- function(id) {
     htmltools::tags$a(href = paste0("https://flipsidecrypto.xyz/edit/queries/",id),
                     target = "_blank",
                     as.character(id))
+}
+
+get_top <- function(querytext, n = 10) {
+  
+  # clean for cosine similarity
+  nq <- clean_query(querytext)
+  nqtdm <- generate_tdm_model(nq, custom_dictionary = Terms(select_tdm))
+  cosims <- calculate_similarity(select_tdm, nqtdm)
+  
+  response <- querytbl
+  response$score <- cosims$cosim
+  response <- response[order(response$score, decreasing = TRUE)[1:n], ]
+  
+  return(response)
+  
 }
