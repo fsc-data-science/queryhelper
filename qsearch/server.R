@@ -6,7 +6,7 @@ server <- function(input, output, session) {
   error_track <- reactiveVal(0)
   
   observeEvent(list(input$search, input$textarea, prev_result(), error_track()), {
-    pr <<- prev_result()
+    prevr <<- prev_result()
     et <<- error_track()
     ta <<- qtext()
     sr <<- search_results()
@@ -63,6 +63,7 @@ server <- function(input, output, session) {
                               {
                                 
      mt <- match_tbl()
+     mt$TABLES <- lapply(mt$TABLES, clean_tbl_names)
      mt$score <- round(mt$score, digits = 2)
      
      # 1 table at a time only

@@ -1,7 +1,6 @@
 library(shiny)
 source("global.R")
 
-
 # Define UI ------
 
 shinyUI(fluidPage(
