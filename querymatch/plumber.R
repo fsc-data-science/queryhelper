@@ -27,11 +27,15 @@ function(querytext, n = 10) {
   nqtdm <- generate_tdm_model(nq, custom_dictionary = Terms(select_tdm))
   cosims <- calculate_similarity(select_tdm, nqtdm)
   
- response <- querytbl
- response$score <- cosims$cosim
- response <- response[order(response$score, decreasing = TRUE)[1:n], ]
-
-return(response)
+  topn = order(cosims$cosim, decreasing = TRUE)[1:n]
+  
+return(
+  data.frame(
+    index = topn,
+    cosim = cosims$cosim[topn]
+  )
+  
+)
  
 }
 
@@ -44,24 +48,9 @@ function() {
   cosims <- calculate_similarity(select_tdm, nqtdm)
   dot_products = slam::row_sums(crossprod_simple_triplet_matrix(select_tdm, nqtdm))
   
-  
-  # Create two sparse matrices as simple_triplet_matrix objects
-  mat1 <- simple_triplet_matrix(
-    i = c(1, 4, 7),
-    j = c(1, 5, 11),
-    v = c(2, 3, 4),
-    nrow = 24,
-    ncol = 11
-  )
-  
-  mat2 <- simple_triplet_matrix(
-    i = c(1, 10, 24),
-    j = c(1, 1, 1),
-    v = c(1, 2, 3),
-    nrow = 24, 
-    ncol = 1
-  )
-  
+mat1 <- select_tdm[, 76286]
+mat2 <- nqtdm 
+
   return(list(
     mean = mean(dot_products),
     med = median(dot_products),
