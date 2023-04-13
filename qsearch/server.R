@@ -91,7 +91,7 @@ shinyServer(function(input, output, session) {
                                   cell = link_renderer),
                 NAME = colDef(minWidth = 20),
                 score = colDef(minWidth = 15),
-                STATEMENT = colDef(cell = preformatted_cell_renderer, minWidth = 80),
+                STATEMENT = colDef(html = TRUE, cell = preformatted_cell_renderer, minWidth = 80),
                 NCHAR = colDef(minWidth = 15),
                 QUERY_TIME = colDef(minWidth = 25)
               ))

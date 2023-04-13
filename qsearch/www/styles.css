@@ -11,6 +11,24 @@
   margin-left: 2%;
   
 }
+
+.sql-code {
+  white-space: pre-wrap;
+}
+
+.sql-code .keyword {
+  color: #d1bbdf;
+}
+
+.sql-code .func_ {
+  color: #cfd4b1;
+}
+
+.sql-code .operator {
+  color: #a7d6ca;
+}
+
+
 /*******************/
 /*     GENERAL Page     */
 /*******************/
